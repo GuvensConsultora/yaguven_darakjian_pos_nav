@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="yaguven_darakjian_pos_nav.CategoryTree">
+        <div class="darakjian-tree-overlay" t-if="pos.darakjianTreeOpen">
+            <div class="darakjian-tree-backdrop" t-on-click="() => this.close()"/>
+            <div class="darakjian-tree-panel">
+                <div class="darakjian-tree-header">
+                    <span class="darakjian-tree-title">Categories</span>
+                    <button class="darakjian-tree-close" t-on-click="() => this.close()">✕</button>
+                </div>
+                <div class="darakjian-tree-body">
+                    <t t-foreach="roots" t-as="node" t-key="node.id">
+                        <t t-call="yaguven_darakjian_pos_nav.CategoryTreeNode">
+                            <t t-set="node" t-value="node"/>
+                        </t>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Nodo recursivo del árbol -->
+    <t t-name="yaguven_darakjian_pos_nav.CategoryTreeNode">
+        <div class="darakjian-tree-row"
+             t-att-style="'padding-left:' + (12 + node.depth * 16) + 'px'">
+            <button class="darakjian-tree-caret"
+                    t-if="node.children.length"
+                    t-on-click.stop="() => this.toggleExpand(node)">
+                <t t-esc="isExpanded(node) ? '▼' : '▶'"/>
+            </button>
+            <span class="darakjian-tree-caret darakjian-tree-caret--leaf" t-else=""/>
+            <span class="darakjian-tree-name"
+                  t-on-click="() => this.selectCategory(node)"
+                  t-esc="node.name"/>
+        </div>
+        <t t-if="node.children.length and isExpanded(node)">
+            <t t-foreach="node.children" t-as="child" t-key="child.id">
+                <t t-call="yaguven_darakjian_pos_nav.CategoryTreeNode">
+                    <t t-set="node" t-value="child"/>
+                </t>
+            </t>
+        </t>
+    </t>
+
+</templates>

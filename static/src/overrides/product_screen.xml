@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Inserta la barra de facetas + botón "Categories" + overlay del árbol.
+         VERIFICAR EN INSTANCIA: el `expr` del xpath debe apuntar a un contenedor
+         real del template point_of_sale.ProductScreen de Odoo 19 (la clase exacta
+         de la columna de productos puede diferir). Si no matchea, reapuntar. -->
+    <t t-inherit="point_of_sale.ProductScreen" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-list-container')]" position="before">
+            <div class="darakjian-pos-nav">
+                <button class="darakjian-tree-toggle btn btn-secondary"
+                        t-on-click="() => this.openDarakjianTree()">
+                    <i class="fa fa-sitemap me-1"/> Categories
+                </button>
+                <DarakjianFacetBar/>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('product-list-container')]" position="after">
+            <DarakjianCategoryTree/>
+        </xpath>
+    </t>
+
+</templates>

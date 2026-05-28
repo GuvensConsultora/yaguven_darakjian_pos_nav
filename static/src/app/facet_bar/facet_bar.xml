@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="yaguven_darakjian_pos_nav.FacetBar">
+        <div class="darakjian-facet-bar" t-if="facets.length">
+            <div class="darakjian-facet-group"
+                 t-foreach="facets" t-as="facet" t-key="facet.id">
+                <span class="darakjian-facet-label" t-esc="facet.label"/>
+                <div class="darakjian-facet-chips">
+                    <button t-foreach="facet.values" t-as="val" t-key="val.id"
+                            class="darakjian-facet-chip"
+                            t-att-class="{ 'darakjian-facet-chip--active': isActive(facet.attrId, val.id) }"
+                            t-on-click="() => this.toggle(facet.attrId, val.id)">
+                        <t t-esc="val.name"/>
+                    </button>
+                </div>
+            </div>
+            <button class="darakjian-facet-clear"
+                    t-if="activeCount"
+                    t-on-click="() => this.clear()">
+                Clear (<t t-esc="activeCount"/>)
+            </button>
+        </div>
+    </t>
+
+</templates>
