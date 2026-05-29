@@ -4,7 +4,7 @@
 // nativo por patch (C.2: extendemos, no reescribimos).
 
 import { patch } from "@web/core/utils/patch";
-import { PosStore } from "@point_of_sale/app/store/pos_store";
+import { PosStore } from "@point_of_sale/app/services/pos_store";
 
 patch(PosStore.prototype, {
     setup() {
