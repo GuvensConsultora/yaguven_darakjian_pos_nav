@@ -46,10 +46,11 @@ class DarakjianPosFacet(models.Model):
             rec.display_name = rec.label or (rec.attribute_id.name or "")
 
     # ---- carga al POS (pos.load.mixin) ----
+    # Odoo 19: la firma del mixin es _load_pos_data_domain(self, data, config).
     @api.model
-    def _load_pos_data_domain(self, data):
+    def _load_pos_data_domain(self, data, config):
         return [("active", "=", True)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ["id", "attribute_id", "label", "sequence", "display_type"]

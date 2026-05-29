@@ -28,12 +28,12 @@ class ProductAttributeValue(models.Model):
     _inherit = ["product.attribute.value", "pos.load.mixin"]
 
     @api.model
-    def _load_pos_data_domain(self, data):
+    def _load_pos_data_domain(self, data, config):
         facet_attr_ids = self.env["darakjian.pos.facet"].search([]).attribute_id.ids
         return [("attribute_id", "in", facet_attr_ids)] if facet_attr_ids else [("id", "=", False)]
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
+    def _load_pos_data_fields(self, config):
         return ["id", "name", "attribute_id", "sequence", "html_color"]
 
 
@@ -73,8 +73,8 @@ class ProductProduct(models.Model):
             p.darakjian_facet_values = by_tmpl.get(p.product_tmpl_id.id, {})
 
     @api.model
-    def _load_pos_data_fields(self, config_id):
-        fields_list = super()._load_pos_data_fields(config_id)
+    def _load_pos_data_fields(self, config):
+        fields_list = super()._load_pos_data_fields(config)
         if "darakjian_facet_values" not in fields_list:
             fields_list.append("darakjian_facet_values")
         return fields_list
