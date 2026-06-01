@@ -24,6 +24,9 @@
         <xpath expr="//CategorySelector" position="after">
             <DarakjianCategoryTree/>
         </xpath>
+        <!-- Eliminar el CategorySelector nativo: la navegación de categorías
+             se hace exclusivamente a través del árbol vertical custom. -->
+        <xpath expr="//CategorySelector" position="replace"/>
     </t>
 
 </templates>
