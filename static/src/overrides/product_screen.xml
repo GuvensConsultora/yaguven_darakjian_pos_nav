@@ -5,8 +5,14 @@
          VERIFICAR EN INSTANCIA: el `expr` del xpath debe apuntar a un contenedor
          real del template point_of_sale.ProductScreen de Odoo 19 (la clase exacta
          de la columna de productos puede diferir). Si no matchea, reapuntar. -->
+    <!-- Odoo 19 ProductScreen: no existe 'product-list-container'; el área de
+         productos vive en rightpane > position-relative > CategorySelector +
+         product-list (t-foreach). Anclamos en CategorySelector que es el primer
+         hijo estable del contenedor position-relative, lo que asegura que
+         DarakjianCategoryTree quede dentro del ancestro position-relative que
+         necesita para su overlay position:absolute/inset:0. -->
     <t t-inherit="point_of_sale.ProductScreen" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('product-list-container')]" position="before">
+        <xpath expr="//CategorySelector" position="before">
             <div class="darakjian-pos-nav">
                 <button class="darakjian-tree-toggle btn btn-secondary"
                         t-on-click="() => this.openDarakjianTree()">
@@ -15,7 +21,7 @@
                 <DarakjianFacetBar/>
             </div>
         </xpath>
-        <xpath expr="//div[hasclass('product-list-container')]" position="after">
+        <xpath expr="//CategorySelector" position="after">
             <DarakjianCategoryTree/>
         </xpath>
     </t>
