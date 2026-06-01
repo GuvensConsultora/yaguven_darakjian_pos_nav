@@ -7,6 +7,14 @@ import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
 
 patch(PosStore.prototype, {
+    // Odoo 19 pos_hr bug: getCashier() devuelve undefined antes de que el
+    // empleado esté cargado y crashea con "_role" de undefined. Aplicamos
+    // optional chaining para que retorne false en lugar de tirar.
+    get employeeIsAdmin() {
+        const cashier = this.getCashier?.();
+        return cashier?._role === "manager";
+    },
+
     setup() {
         super.setup(...arguments);
         // Facetas activas: { [String(attributeId)]: [valueId, ...] }
