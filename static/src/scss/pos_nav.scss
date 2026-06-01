@@ -137,6 +137,18 @@ $dk-accent: #2c3e50;
             background: #f1f4f7;
         }
 
+        &--active {
+            background: #eaf0fb;
+            font-weight: 600;
+            color: $dk-accent;
+        }
+
+        &--all {
+            border-bottom: 1px solid #e0e5ea;
+            margin-bottom: 4px;
+            padding-left: 12px !important;
+        }
+
         .darakjian-tree-caret {
             border: none;
             background: transparent;

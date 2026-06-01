@@ -10,6 +10,13 @@
                     <button class="darakjian-tree-close" t-on-click="() => this.close()">✕</button>
                 </div>
                 <div class="darakjian-tree-body">
+                    <!-- Fila "Todos": limpia el filtro y muestra todos los productos -->
+                    <div class="darakjian-tree-row darakjian-tree-row--all"
+                         t-att-class="{ 'darakjian-tree-row--active': !selectedCategoryId }"
+                         t-on-click="() => this.clearCategory()">
+                        <span class="darakjian-tree-caret darakjian-tree-caret--leaf"/>
+                        <span class="darakjian-tree-name">All Products</span>
+                    </div>
                     <t t-foreach="roots" t-as="node" t-key="node.id">
                         <t t-call="yaguven_darakjian_pos_nav.CategoryTreeNode">
                             <t t-set="node" t-value="node"/>
@@ -20,9 +27,9 @@
         </div>
     </t>
 
-    <!-- Nodo recursivo del árbol -->
     <t t-name="yaguven_darakjian_pos_nav.CategoryTreeNode">
         <div class="darakjian-tree-row"
+             t-att-class="{ 'darakjian-tree-row--active': selectedCategoryId === node.id }"
              t-att-style="'padding-left:' + (12 + node.depth * 16) + 'px'">
             <button class="darakjian-tree-caret"
                     t-if="node.children.length"

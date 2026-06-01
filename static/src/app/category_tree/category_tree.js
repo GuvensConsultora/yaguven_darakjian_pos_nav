@@ -1,9 +1,4 @@
 /** @odoo-module **/
-// Overlay del árbol VERTICAL de categorías (accordion). Muestra la jerarquía
-// completa pos.category (parent_id/child_ids) que el POS nativo no expone en
-// vertical. Accordion estricto: solo una rama abierta por nivel -> altura acotada
-// aunque un nodo tenga 14 hijos (ej. Loose Diamonds).
-
 import { Component, useState } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
@@ -13,7 +8,6 @@ export class DarakjianCategoryTree extends Component {
 
     setup() {
         this.pos = usePos();
-        // expandedByDepth[depth] = id del nodo abierto en ese nivel (accordion).
         this.state = useState({ expandedByDepth: {} });
     }
 
@@ -29,13 +23,24 @@ export class DarakjianCategoryTree extends Component {
             (childrenOf[pid] = childrenOf[pid] || []).push(c);
         }
         const sortFn = (a, b) => (a.sequence - b.sequence) || (a.id - b.id);
-        const build = (cat, depth) => ({
-            id: cat.id,
-            name: cat.name,
-            depth,
-            children: (childrenOf[cat.id] || []).sort(sortFn).map((c) => build(c, depth + 1)),
-        });
-        return (childrenOf[null] || []).sort(sortFn).map((c) => build(c, 0));
+
+        // Construye el nodo y poda ramas sin productos.
+        const build = (cat, depth) => {
+            const children = (childrenOf[cat.id] || [])
+                .sort(sortFn)
+                .map((c) => build(c, depth + 1))
+                .filter(Boolean);
+            if (!cat.hasProductsToShow && children.length === 0) {
+                return null;
+            }
+            return { id: cat.id, name: cat.name, depth, children };
+        };
+
+        return (childrenOf[null] || []).sort(sortFn).map((c) => build(c, 0)).filter(Boolean);
+    }
+
+    get selectedCategoryId() {
+        return this.pos.selectedCategory?.id ?? null;
     }
 
     isExpanded(node) {
@@ -45,18 +50,12 @@ export class DarakjianCategoryTree extends Component {
     toggleExpand(node) {
         const cur = { ...this.state.expandedByDepth };
         if (cur[node.depth] === node.id) {
-            // colapsar este nivel y los más profundos
             for (const d of Object.keys(cur)) {
-                if (Number(d) >= node.depth) {
-                    delete cur[d];
-                }
+                if (Number(d) >= node.depth) delete cur[d];
             }
         } else {
-            // abrir este (reemplaza al hermano), limpiar niveles más profundos
             for (const d of Object.keys(cur)) {
-                if (Number(d) > node.depth) {
-                    delete cur[d];
-                }
+                if (Number(d) > node.depth) delete cur[d];
             }
             cur[node.depth] = node.id;
         }
@@ -64,8 +63,13 @@ export class DarakjianCategoryTree extends Component {
     }
 
     selectCategory(node) {
-        // Reusar la selección de categoría nativa del POS (filtra la grilla).
-        this.pos.selectedCategoryId = node.id;
+        this.pos.setSelectedCategory(node.id);
+        this.close();
+    }
+
+    clearCategory() {
+        // Limpiar la selección muestra todos los productos.
+        this.pos.selectedCategory = null;
         this.close();
     }
 
