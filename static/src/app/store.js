@@ -29,11 +29,19 @@ patch(PosStore.prototype, {
         this.darakjianFacets = {};
         // Overlay del árbol vertical de categorías.
         this.darakjianTreeOpen = false;
-        // Flag: false hasta que DarakjianCategoryTree.onMounted selecciona la
-        // primera categoría. Mientras es false, product_screen devuelve [] para
-        // evitar el flood de img requests sobre los 300+ templates antes de que
-        // el usuario haya elegido una categoría.
-        this.darakjianInitialized = false;
+    },
+
+    /** Override del getter REAL que alimenta la grilla del POS O19.
+     *  El template product_screen.xml itera pos.productToDisplayByCateg, que
+     *  deriva de pos.productsToDisplay (getter del PosStore) — NO del getter
+     *  `products` del componente ProductScreen.  Por eso el filtro de facetas
+     *  debe aplicarse acá para tener efecto. */
+    get productsToDisplay() {
+        const base = super.productsToDisplay;
+        if (!this.darakjianActiveFacetCount) {
+            return base;
+        }
+        return base.filter((p) => this.darakjianProductMatches(p));
     },
 
     /** Activa/desactiva un valor de faceta. Reasigna el objeto para disparar

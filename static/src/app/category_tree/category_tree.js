@@ -14,10 +14,11 @@ export class DarakjianCategoryTree extends Component {
         // disponible en la config (evita que el POS muestre todos los productos
         // a la vez, lo que traba el browser con miles de cards + image requests).
         onMounted(() => {
-            // Seleccionar la primera categoría disponible si O19 no lo hizo.
-            // IMPORTANTE: hacer esto ANTES de marcar darakjianInitialized=true,
-            // para que el grid pase de [] a los productos de la categoría en un
-            // solo tick reactivo (sin pasar por el estado "todos los productos").
+            // CategorySelector nativo fue reemplazado por este árbol; nadie
+            // inicia la selección.  Arrancar enfocado en la primera categoría
+            // disponible (mejor UX que mostrar el catálogo entero).  Las
+            // imágenes ya no son un problema de performance: el override de
+            // ProductCard agrega loading="lazy" → solo se cargan las visibles.
             if (!this.pos.selectedCategory) {
                 const configCatIds = this.pos.config.iface_available_categ_ids || [];
                 const firstId = configCatIds.length
@@ -27,9 +28,6 @@ export class DarakjianCategoryTree extends Component {
                     this.pos.setSelectedCategory(firstId);
                 }
             }
-            // Habilitar el grid (hasta aquí devolvía [] para evitar el flood
-            // inicial de 146 image requests que saturaban Odoo.sh workers).
-            this.pos.darakjianInitialized = true;
         });
     }
 

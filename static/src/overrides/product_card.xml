@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Lazy-loading de las imágenes de producto en el POS.
+         CAUSA: el <img> nativo de point_of_sale.ProductCard no declara
+         loading="lazy".  Al pintar la grilla (hasta 100 productos, cap nativo
+         de productsToDisplay), el browser dispara ~100 requests de
+         /web/image/.../image_128 simultáneos y decodifica 100 imágenes en el
+         main thread → la pestaña se congela ("se tilda el navegador").
+         FIX: loading="lazy" hace que el browser solo cargue las imágenes que
+         entran al viewport (~12), y decoding="async" saca la decodificación
+         del main thread.  Mínimamente invasivo (C.2): solo añade 2 atributos
+         HTML estándar al <img>, sin tocar la lógica de la card. -->
+    <t t-inherit="point_of_sale.ProductCard" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-img')]/img" position="attributes">
+            <attribute name="loading">lazy</attribute>
+            <attribute name="decoding">async</attribute>
+        </xpath>
+    </t>
+
+</templates>
