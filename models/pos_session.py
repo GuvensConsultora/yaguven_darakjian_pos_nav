@@ -24,6 +24,26 @@ class ProductTemplate(models.Model):
              "Los demás se cargan en background por categoría.",
     )
 
+    @api.model
+    def _load_pos_data_domain(self, data, config):
+        """Carga inicial del POS: solo templates con pos_load_priority=True.
+
+        La grilla del POS de O19 lista por product.template, así que filtrar
+        acá es lo que efectivamente reduce el payload y el tiempo de cómputo
+        server-side del arranque.  El resto de templates los trae el background
+        loader por categoría vía el método nativo load_product_from_pos.
+
+        Fallback: si no hay ningún prioritario marcado (campo aún sin setear),
+        cae al dominio nativo para no dejar el POS vacío.
+        """
+        base_domain = super()._load_pos_data_domain(data, config)
+        priority_count = self.search_count(
+            [("pos_load_priority", "=", True), ("available_in_pos", "=", True)]
+        )
+        if priority_count == 0:
+            return base_domain
+        return base_domain + [("pos_load_priority", "=", True)]
+
 
 class PosSession(models.Model):
     _inherit = "pos.session"
@@ -34,29 +54,13 @@ class PosSession(models.Model):
         models_list += ["darakjian.pos.facet", "product.attribute.value"]
         return models_list
 
-    def darakjian_get_products_for_categ(self, categ_id):
-        """Devuelve las variantes NO prioritarias de una pos.category.
-
-        Llamado por el background loader JS después de que el POS ya arrancó.
-        Retorna los mismos campos que _load_pos_data_fields para que el store
-        pueda mergearlos sin transformación adicional.
-        """
-        config = self.config_id
-        domain = [
-            ("available_in_pos", "=", True),
-            ("active", "=", True),
-            ("pos_categ_ids", "=", categ_id),
-            ("product_tmpl_id.pos_load_priority", "=", False),
-        ]
-        if config.limit_categories and config.iface_available_categ_ids:
-            domain.append(
-                ("pos_categ_ids", "in", config.iface_available_categ_ids.ids)
-            )
-        flds = self.env["product.product"]._load_pos_data_fields(config)
-        # Incluir image_128 para el background load (el inicial no la lleva)
-        if "image_128" not in flds:
-            flds = list(flds) + ["image_128"]
-        return self.env["product.product"].search_read(domain, fields=flds)
+    # La carga on-demand de productos por categoría NO se resuelve con un método
+    # custom: el background loader JS llama directamente al método nativo de O19
+    # product.template.load_product_from_pos(config_id, domain), que devuelve
+    # templates + variantes + taxes + atributos en el mismo formato que el
+    # payload inicial (image_128 como bool → URL lazy) y se mergea con el
+    # connectNewData nativo.  Así no reimplementamos formato ni merge: si un
+    # upgrade de O19 cambia el shape del payload, el método nativo cambia con él.
 
 
 class ProductAttributeValue(models.Model):

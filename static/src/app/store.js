@@ -6,6 +6,10 @@
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
 
+// Categorías ya cargadas / en vuelo en esta sesión (evitan doble-carga).
+const _dkLoadedCateg = new Set();
+const _dkLoadingCateg = new Set();
+
 patch(PosStore.prototype, {
     // Odoo 19 pos_hr bug: getCashier() devuelve undefined antes de que el
     // empleado esté cargado y crashea con "_role" de undefined. Aplicamos
@@ -65,5 +69,64 @@ patch(PosStore.prototype, {
             const have = productValues[attrId] || [];
             return have.some((vid) => wanted.includes(vid));
         });
+    },
+
+    // ─── Background loader: carga de no-prioritarios por categoría ────────────
+    // Apoyado 100% en APIs nativas O19: load_product_from_pos (server) resuelve
+    // templates + variantes + taxes + atributos en el shape del payload inicial
+    // (image_128 como bool → imágenes por URL lazy); callRelated los mergea con
+    // el connectNewData nativo.  Sin formato ni merge custom → robusto en upgrades.
+
+    async darakjianStartBackgroundLoad() {
+        let catIds;
+        try {
+            catIds = this.models["pos.category"].getAll().map((c) => c.id);
+        } catch (e) {
+            console.warn("[Darakjian BG] no se pudieron leer las categorías:", e);
+            return;
+        }
+        for (const catId of catIds) {
+            if (_dkLoadedCateg.has(catId) || _dkLoadingCateg.has(catId)) continue;
+            await new Promise((r) => setTimeout(r, 200)); // yield a la UI
+            await this.darakjianLoadCateg(catId).catch((e) =>
+                console.warn(`[Darakjian BG] categ ${catId} falló:`, e)
+            );
+        }
+    },
+
+    async darakjianLoadCateg(catId) {
+        if (_dkLoadedCateg.has(catId) || _dkLoadingCateg.has(catId)) return;
+        _dkLoadingCateg.add(catId);
+        try {
+            // Templates no-prioritarios de la categoría (los prioritarios ya
+            // entraron en la carga inicial).
+            const domain = [
+                ["pos_categ_ids", "=", catId],
+                ["pos_load_priority", "=", false],
+            ];
+            await this.data.callRelated(
+                "product.template",
+                "load_product_from_pos",
+                [this.config.id, domain],
+                {},
+                true,   // queue
+                true,   // loadMissingRecords (trae relacionados faltantes)
+            );
+            _dkLoadedCateg.add(catId);
+        } finally {
+            _dkLoadingCateg.delete(catId);
+        }
+    },
+
+    async darakjianEnsureCategLoaded(catId) {
+        if (!catId || _dkLoadedCateg.has(catId)) return;
+        await this.darakjianLoadCateg(catId);
+    },
+
+    /** Al elegir una categoría, cargar sus no-prioritarios ya si el loop de
+     *  background todavía no llegó (carga inmediata, mejor UX). */
+    setSelectedCategory(categoryId) {
+        super.setSelectedCategory(categoryId);
+        this.darakjianEnsureCategLoaded(categoryId);
     },
 });
