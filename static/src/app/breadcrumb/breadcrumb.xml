@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="yaguven_darakjian_pos_nav.Breadcrumb">
+        <nav class="darakjian-breadcrumb" t-if="trail.length">
+            <t t-foreach="trail" t-as="crumb" t-key="crumb.id">
+                <span t-if="crumb_index gt 0" class="darakjian-breadcrumb-sep">›</span>
+                <button class="darakjian-breadcrumb-item"
+                        t-att-class="{ 'darakjian-breadcrumb-item--current': crumb_index === trail.length - 1 }"
+                        t-on-click="() => this.selectCrumb(crumb.id)">
+                    <t t-esc="crumb.name"/>
+                </button>
+            </t>
+        </nav>
+    </t>
+
+</templates>

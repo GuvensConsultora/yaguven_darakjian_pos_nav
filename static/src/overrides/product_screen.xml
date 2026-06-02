@@ -18,6 +18,7 @@
                         t-on-click="() => this.openDarakjianTree()">
                     <i class="fa fa-sitemap me-1"/> Categories
                 </button>
+                <DarakjianBreadcrumb/>
                 <DarakjianFacetBar/>
             </div>
         </xpath>

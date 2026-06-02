@@ -44,6 +44,50 @@ $dk-panel-text: #f3efe6;     // marfil
     }
 }
 
+// ---- Migas de pan (categoría actual) ----
+.darakjian-breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2px;
+    font-size: 15px;
+
+    .darakjian-breadcrumb-sep {
+        color: $dk-gold;
+        font-size: 18px;
+        line-height: 1;
+        padding: 0 2px;
+        user-select: none;
+    }
+
+    .darakjian-breadcrumb-item {
+        border: none;
+        background: transparent;
+        color: var(--bs-body-color);
+        padding: 4px 6px;
+        border-radius: 6px;
+        cursor: pointer;
+        line-height: 1.2;
+        white-space: nowrap;
+
+        &:hover {
+            background: rgba(201, 169, 106, 0.18);
+            color: var(--bs-emphasis-color);
+        }
+
+        // Nivel actual: destacado, no se ve como link.
+        &--current {
+            font-weight: 700;
+            color: var(--bs-emphasis-color);
+            cursor: default;
+
+            &:hover {
+                background: transparent;
+            }
+        }
+    }
+}
+
 // ---- Barra de facetas ----
 .darakjian-facet-bar {
     display: flex;

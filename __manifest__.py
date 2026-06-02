@@ -32,6 +32,8 @@ el POS nativo OWL, sin campos en modelos nativos).
         "point_of_sale._assets_pos": [
             "yaguven_darakjian_pos_nav/static/src/scss/pos_nav.scss",
             "yaguven_darakjian_pos_nav/static/src/app/store.js",
+            "yaguven_darakjian_pos_nav/static/src/app/breadcrumb/breadcrumb.js",
+            "yaguven_darakjian_pos_nav/static/src/app/breadcrumb/breadcrumb.xml",
             "yaguven_darakjian_pos_nav/static/src/app/facet_bar/facet_bar.js",
             "yaguven_darakjian_pos_nav/static/src/app/facet_bar/facet_bar.xml",
             "yaguven_darakjian_pos_nav/static/src/app/category_tree/category_tree.js",
