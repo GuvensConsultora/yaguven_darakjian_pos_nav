@@ -9,6 +9,10 @@ import { PosStore } from "@point_of_sale/app/services/pos_store";
 // Categorías ya cargadas / en vuelo en esta sesión (evitan doble-carga).
 const _dkLoadedCateg = new Set();
 const _dkLoadingCateg = new Set();
+// Tope de templates no-prioritarios a traer al entrar a una categoría.  Acota
+// el volumen para que una categoría enorme no cuelgue; el resto queda accesible
+// por la búsqueda nativa del POS.
+const DK_CATEG_LIMIT = 200;
 
 patch(PosStore.prototype, {
     // Odoo 19 pos_hr bug: getCashier() devuelve undefined antes de que el
@@ -71,35 +75,25 @@ patch(PosStore.prototype, {
         });
     },
 
-    // ─── Background loader: carga de no-prioritarios por categoría ────────────
-    // Apoyado 100% en APIs nativas O19: load_product_from_pos (server) resuelve
+    // ─── Carga on-demand de no-prioritarios por categoría ─────────────────────
+    // NO se precarga el catálogo en background: precargar las ~144 categorías
+    // (varias con miles de productos) saturaba la cola de sync del POS y trababa
+    // el cierre de sesión.  En su lugar, cada categoría se carga SOLO cuando el
+    // cajero la selecciona (ver setSelectedCategory), y acotada por DK_CATEG_LIMIT
+    // para que una categoría enorme (p.ej. Watches: 2.2k) no cuelgue la UI.
+    //
+    // Apoyado 100% en APIs nativas O19: load_product_from_pos (server) devuelve
     // templates + variantes + taxes + atributos en el shape del payload inicial
     // (image_128 como bool → imágenes por URL lazy); callRelated los mergea con
     // el connectNewData nativo.  Sin formato ni merge custom → robusto en upgrades.
-
-    async darakjianStartBackgroundLoad() {
-        let catIds;
-        try {
-            catIds = this.models["pos.category"].getAll().map((c) => c.id);
-        } catch (e) {
-            console.warn("[Darakjian BG] no se pudieron leer las categorías:", e);
-            return;
-        }
-        for (const catId of catIds) {
-            if (_dkLoadedCateg.has(catId) || _dkLoadingCateg.has(catId)) continue;
-            await new Promise((r) => setTimeout(r, 200)); // yield a la UI
-            await this.darakjianLoadCateg(catId).catch((e) =>
-                console.warn(`[Darakjian BG] categ ${catId} falló:`, e)
-            );
-        }
-    },
 
     async darakjianLoadCateg(catId) {
         if (_dkLoadedCateg.has(catId) || _dkLoadingCateg.has(catId)) return;
         _dkLoadingCateg.add(catId);
         try {
             // Templates no-prioritarios de la categoría (los prioritarios ya
-            // entraron en la carga inicial).
+            // entraron en la carga inicial).  Los que excedan el límite quedan
+            // accesibles por la búsqueda nativa del POS.
             const domain = [
                 ["pos_categ_ids", "=", catId],
                 ["pos_load_priority", "=", false],
@@ -107,9 +101,9 @@ patch(PosStore.prototype, {
             await this.data.callRelated(
                 "product.template",
                 "load_product_from_pos",
-                [this.config.id, domain],
+                [this.config.id, domain, 0, DK_CATEG_LIMIT],
                 {},
-                true,   // queue
+                false,  // sin cola: carga puntual, no debe bloquear el cierre
                 true,   // loadMissingRecords (trae relacionados faltantes)
             );
             _dkLoadedCateg.add(catId);
@@ -120,7 +114,11 @@ patch(PosStore.prototype, {
 
     async darakjianEnsureCategLoaded(catId) {
         if (!catId || _dkLoadedCateg.has(catId)) return;
-        await this.darakjianLoadCateg(catId);
+        // No await: la carga corre en segundo plano y la UI se actualiza sola al
+        // mergear (reactividad de connectNewData).  No bloquea la navegación.
+        this.darakjianLoadCateg(catId).catch((e) =>
+            console.warn(`[Darakjian] carga categ ${catId} falló:`, e)
+        );
     },
 
     /** Al elegir una categoría, cargar sus no-prioritarios ya si el loop de

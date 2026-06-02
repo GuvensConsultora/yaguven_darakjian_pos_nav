@@ -36,7 +36,6 @@ el POS nativo OWL, sin campos en modelos nativos).
             "yaguven_darakjian_pos_nav/static/src/app/facet_bar/facet_bar.xml",
             "yaguven_darakjian_pos_nav/static/src/app/category_tree/category_tree.js",
             "yaguven_darakjian_pos_nav/static/src/app/category_tree/category_tree.xml",
-            "yaguven_darakjian_pos_nav/static/src/app/background_loader.js",
             "yaguven_darakjian_pos_nav/static/src/overrides/product_screen.js",
             "yaguven_darakjian_pos_nav/static/src/overrides/product_screen.xml",
         ],
