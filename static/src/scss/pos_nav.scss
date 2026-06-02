@@ -1,6 +1,7 @@
 // Estilos de la navegación custom del POS Darakjian.
-// Densidad de escritorio por defecto; targets táctiles ampliados a 48px en touch
-// (@media pointer: coarse), según el estudio UX (una sola UI PC + tablet).
+// Colores semánticos vía CSS variables de Bootstrap 5 (--bs-*) para que el
+// tema claro y oscuro del POS se respete automáticamente.
+// Solo $dk-accent se mantiene fijo: es el color de marca del estudio.
 
 $dk-chip-radius: 16px;
 $dk-accent: #2c3e50;
@@ -33,7 +34,7 @@ $dk-accent: #2c3e50;
 
     .darakjian-facet-label {
         font-weight: 600;
-        color: $dk-accent;
+        color: var(--bs-emphasis-color);
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.3px;
@@ -46,8 +47,9 @@ $dk-accent: #2c3e50;
     }
 
     .darakjian-facet-chip {
-        border: 1px solid #ccd2d8;
-        background: #fff;
+        border: 1px solid var(--bs-border-color);
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
         border-radius: $dk-chip-radius;
         padding: 4px 12px;
         font-size: 13px;
@@ -69,7 +71,7 @@ $dk-accent: #2c3e50;
         margin-left: auto;
         border: none;
         background: transparent;
-        color: #c0392b;
+        color: var(--bs-danger-text-emphasis, #c0392b);
         font-size: 13px;
         cursor: pointer;
     }
@@ -85,15 +87,16 @@ $dk-accent: #2c3e50;
     .darakjian-tree-backdrop {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.35);
+        background: rgba(0, 0, 0, 0.45);
     }
 
     .darakjian-tree-panel {
         position: relative;
         width: 340px;
         max-width: 85%;
-        background: #fff;
-        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.3);
         display: flex;
         flex-direction: column;
     }
@@ -134,17 +137,21 @@ $dk-accent: #2c3e50;
         cursor: pointer;
 
         &:hover {
-            background: #f1f4f7;
+            background: var(--bs-tertiary-bg);
         }
 
+        // Categoría activa: borde izquierdo de marca + fondo secundario neutro.
+        // --bs-secondary-bg funciona en claro (gris claro) y oscuro (gris oscuro)
+        // sin necesidad de override manual.
         &--active {
-            background: #eaf0fb;
+            background: var(--bs-secondary-bg);
+            border-left: 3px solid $dk-accent;
             font-weight: 600;
-            color: $dk-accent;
+            color: var(--bs-emphasis-color);
         }
 
         &--all {
-            border-bottom: 1px solid #e0e5ea;
+            border-bottom: 1px solid var(--bs-border-color);
             margin-bottom: 4px;
             padding-left: 12px !important;
         }
@@ -156,7 +163,7 @@ $dk-accent: #2c3e50;
             text-align: center;
             cursor: pointer;
             font-size: 11px;
-            color: #7a848d;
+            color: var(--bs-secondary-color);
 
             &--leaf {
                 visibility: hidden;
