@@ -30,7 +30,7 @@
     <t t-name="yaguven_darakjian_pos_nav.CategoryTreeNode">
         <div class="darakjian-tree-row"
              t-att-class="{ 'darakjian-tree-row--active': selectedCategoryId === node.id }"
-             t-att-style="'padding-left:' + (12 + node.depth * 16) + 'px'">
+             t-att-style="'padding-left:' + (12 + node.depth * 22) + 'px'">
             <button class="darakjian-tree-caret"
                     t-if="node.children.length"
                     t-on-click.stop="() => this.toggleExpand(node)">

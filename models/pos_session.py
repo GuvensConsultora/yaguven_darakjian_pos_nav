@@ -73,6 +73,27 @@ class PosSession(models.Model):
     # upgrade de O19 cambia el shape del payload, el método nativo cambia con él.
 
 
+class PosCategory(models.Model):
+    """Cargar la jerarquía COMPLETA de categorías al POS.
+
+    Nativo O19: con limit_categories=True, pos.category._load_pos_data_domain
+    devuelve solo iface_available_categ_ids (las 16 configuradas) — sin sus
+    ancestros ni descendientes.  El árbol vertical custom queda entonces sin la
+    jerarquía y se ve plano frente a la vista de inventario (product.category).
+
+    Override: devolver dominio vacío → cargar las 144 categorías con su árbol
+    completo, espejando inventario.  Campos mínimos (id/name/parent_id/seq) →
+    payload despreciable.  El selector nativo fue reemplazado por el árbol, así
+    que limit_categories ya no cumple función de filtrado de UI acá.
+    """
+
+    _inherit = "pos.category"
+
+    @api.model
+    def _load_pos_data_domain(self, data, config):
+        return []
+
+
 class ProductAttributeValue(models.Model):
     """Solo los valores de los atributos configurados como faceta."""
 

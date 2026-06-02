@@ -44,19 +44,19 @@ export class DarakjianCategoryTree extends Component {
         }
         const sortFn = (a, b) => (a.sequence - b.sequence) || (a.id - b.id);
 
-        // Construye el nodo y poda ramas sin productos.
+        // Construye el árbol COMPLETO, sin podar: se muestran todas las
+        // categorías con su jerarquía, igual que la vista de inventario.  Antes
+        // se podaban las ramas sin productos cargados, pero con la carga lazy
+        // (solo prioritarios al inicio) eso escondía casi todo el árbol.  Al
+        // hacer click en una categoría sus productos se cargan on-demand.
         const build = (cat, depth) => {
             const children = (childrenOf[cat.id] || [])
                 .sort(sortFn)
-                .map((c) => build(c, depth + 1))
-                .filter(Boolean);
-            if (!cat.hasProductsToShow && children.length === 0) {
-                return null;
-            }
+                .map((c) => build(c, depth + 1));
             return { id: cat.id, name: cat.name, depth, children };
         };
 
-        return (childrenOf[null] || []).sort(sortFn).map((c) => build(c, 0)).filter(Boolean);
+        return (childrenOf[null] || []).sort(sortFn).map((c) => build(c, 0));
     }
 
     get selectedCategoryId() {
