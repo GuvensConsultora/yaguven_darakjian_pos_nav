@@ -22,6 +22,13 @@ patch(ProductScreen.prototype, {
     // pintar en la grilla de Odoo 19. Si no es `products`, reapuntar el override
     // al getter correcto (p.ej. getProductsToDisplay / productsToDisplay).
     get products() {
+        // Mientras darakjianInitialized=false (ventana entre primer render y
+        // onMounted de CategoryTree), devolver vacío para evitar renderizar los
+        // 300+ cards con image_128=True que lanzan ~146 img requests simultáneos
+        // y saturan los workers de Odoo.sh antes de que el usuario elija categoría.
+        if (!this.pos.darakjianInitialized && !this.pos.selectedCategory) {
+            return [];
+        }
         const base = super.products;
         if (!this.pos.darakjianActiveFacetCount) {
             return base;

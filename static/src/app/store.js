@@ -29,6 +29,11 @@ patch(PosStore.prototype, {
         this.darakjianFacets = {};
         // Overlay del árbol vertical de categorías.
         this.darakjianTreeOpen = false;
+        // Flag: false hasta que DarakjianCategoryTree.onMounted selecciona la
+        // primera categoría. Mientras es false, product_screen devuelve [] para
+        // evitar el flood de img requests sobre los 300+ templates antes de que
+        // el usuario haya elegido una categoría.
+        this.darakjianInitialized = false;
     },
 
     /** Activa/desactiva un valor de faceta. Reasigna el objeto para disparar
