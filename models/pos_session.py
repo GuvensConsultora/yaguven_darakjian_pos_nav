@@ -70,11 +70,11 @@ class ProductAttributeValue(models.Model):
         facet_attr_ids = (
             self.env["darakjian.pos.facet"].search([]).attribute_id.ids
         )
-        return (
-            [("attribute_id", "in", facet_attr_ids)]
-            if facet_attr_ids
-            else [("id", "=", False)]
-        )
+        if facet_attr_ids:
+            return [("attribute_id", "in", facet_attr_ids)]
+        # Sin facetas configuradas: dejar pasar el dominio nativo de O19 para
+        # que el POS pueda renderizar variantes con sus atributos normalmente.
+        return super()._load_pos_data_domain(data, config)
 
     @api.model
     def _load_pos_data_fields(self, config):
