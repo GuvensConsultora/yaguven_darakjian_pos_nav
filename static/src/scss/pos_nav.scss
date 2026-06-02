@@ -5,6 +5,11 @@
 
 $dk-chip-radius: 16px;
 $dk-accent: #2c3e50;
+// Paleta "Noche & Oro" del panel de categorías (look premium fijo, opaco,
+// independiente del tema claro/oscuro del POS).
+$dk-gold: #c9a96a;
+$dk-panel-bg: #1b2030;       // carbón profundo, 100% opaco
+$dk-panel-text: #f3efe6;     // marfil
 
 .darakjian-pos-nav {
     display: flex;
@@ -108,16 +113,20 @@ $dk-accent: #2c3e50;
     .darakjian-tree-backdrop {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.6);
     }
 
     .darakjian-tree-panel {
         position: relative;
         width: 380px;
         max-width: 85%;
-        background: var(--bs-body-bg);
-        color: var(--bs-body-color);
-        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.3);
+        // Fondo sólido OPACO: el problema era var(--bs-body-bg), que en el
+        // contexto del POS en modo oscuro no resolvía a un color sólido → el
+        // panel se veía translúcido sobre la grilla.  Color fijo premium.
+        background: $dk-panel-bg;
+        color: $dk-panel-text;
+        border-right: 2px solid $dk-gold;       // filo dorado
+        box-shadow: 4px 0 28px rgba(0, 0, 0, 0.55);
         display: flex;
         flex-direction: column;
     }
@@ -129,11 +138,13 @@ $dk-accent: #2c3e50;
         padding: 16px 18px;
         background: $dk-accent;
         color: #fff;
+        border-bottom: 1px solid $dk-gold;      // separador dorado header/body
 
         .darakjian-tree-title {
             font-weight: 700;
             font-size: 19px;
             letter-spacing: 0.3px;
+            color: $dk-gold;                    // título en dorado
         }
 
         .darakjian-tree-close {
@@ -158,24 +169,24 @@ $dk-accent: #2c3e50;
         padding-top: 10px;
         padding-bottom: 10px;
         font-size: 16px;
+        color: $dk-panel-text;
         cursor: pointer;
 
         &:hover {
-            background: var(--bs-tertiary-bg);
+            background: rgba(255, 255, 255, 0.06);
         }
 
-        // Categoría activa: borde izquierdo de marca + fondo secundario neutro.
-        // --bs-secondary-bg funciona en claro (gris claro) y oscuro (gris oscuro)
-        // sin necesidad de override manual.
+        // Categoría activa: filo dorado + leve realce dorado de fondo, texto
+        // en dorado claro.  Acento "Noche & Oro" sobre el carbón del panel.
         &--active {
-            background: var(--bs-secondary-bg);
-            border-left: 3px solid $dk-accent;
+            background: rgba(201, 169, 106, 0.12);
+            border-left: 3px solid $dk-gold;
             font-weight: 600;
-            color: var(--bs-emphasis-color);
+            color: #ffffff;
         }
 
         &--all {
-            border-bottom: 1px solid var(--bs-border-color);
+            border-bottom: 1px solid rgba(201, 169, 106, 0.25);
             margin-bottom: 4px;
             padding-left: 12px !important;
         }
@@ -187,7 +198,7 @@ $dk-accent: #2c3e50;
             text-align: center;
             cursor: pointer;
             font-size: 11px;
-            color: var(--bs-secondary-color);
+            color: $dk-gold;
 
             &--leaf {
                 visibility: hidden;
