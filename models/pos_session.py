@@ -51,7 +51,10 @@ class PosSession(models.Model):
     def _load_pos_data_models(self, config_id):
         """Añadir nuestros modelos al payload de sesión."""
         models_list = super()._load_pos_data_models(config_id)
-        models_list += ["darakjian.pos.facet", "product.attribute.value"]
+        # product.attribute.value ya viene en la lista nativa de O19;
+        # agregarlo de nuevo causaba carga duplicada en connectNewData.
+        if "darakjian.pos.facet" not in models_list:
+            models_list += ["darakjian.pos.facet"]
         return models_list
 
     # La carga on-demand de productos por categoría NO se resuelve con un método

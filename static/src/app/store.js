@@ -12,7 +12,7 @@ const _dkLoadingCateg = new Set();
 // Tope de templates no-prioritarios a traer al entrar a una categoría.  Acota
 // el volumen para que una categoría enorme no cuelgue; el resto queda accesible
 // por la búsqueda nativa del POS.
-const DK_CATEG_LIMIT = 200;
+const DK_CATEG_LIMIT = 50;
 
 patch(PosStore.prototype, {
     // Odoo 19 pos_hr bug: getCashier() devuelve undefined antes de que el
@@ -103,7 +103,7 @@ patch(PosStore.prototype, {
                 "load_product_from_pos",
                 [this.config.id, domain, 0, DK_CATEG_LIMIT],
                 {},
-                false,  // sin cola: carga puntual, no debe bloquear el cierre
+                true,   // queue=true: sincroniza con el batch nativo evitando race conditions
                 true,   // loadMissingRecords (trae relacionados faltantes)
             );
             _dkLoadedCateg.add(catId);

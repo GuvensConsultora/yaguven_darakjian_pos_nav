@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, onMounted } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
 export class DarakjianCategoryTree extends Component {
@@ -9,6 +9,21 @@ export class DarakjianCategoryTree extends Component {
     setup() {
         this.pos = usePos();
         this.state = useState({ expandedByDepth: {} });
+        // CategorySelector nativo fue reemplazado por este árbol.
+        // Al montar, inicializar la categoría seleccionada con la primera
+        // disponible en la config (evita que el POS muestre todos los productos
+        // a la vez, lo que traba el browser con miles de cards + image requests).
+        onMounted(() => {
+            if (!this.pos.selectedCategory) {
+                const configCatIds = this.pos.config.iface_available_categ_ids || [];
+                const firstId = configCatIds.length
+                    ? (configCatIds[0]?.id ?? configCatIds[0])
+                    : null;
+                if (firstId) {
+                    this.pos.setSelectedCategory(firstId);
+                }
+            }
+        });
     }
 
     _rel(val) {
