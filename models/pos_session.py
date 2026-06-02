@@ -49,12 +49,19 @@ class PosSession(models.Model):
     _inherit = "pos.session"
 
     def _load_pos_data_models(self, config_id):
-        """Añadir nuestros modelos al payload de sesión."""
+        """Añadir nuestros modelos al payload de sesión.
+
+        AMBOS modelos deben estar presentes en pos.models del frontend aunque
+        no haya facetas configuradas: el componente DarakjianFacetBar lee
+        this.pos.models["product.attribute.value"] y ["darakjian.pos.facet"]
+        en su getter `facets`.  Si falta cualquiera, getAll() sobre undefined
+        crashea el lifecycle de OWL y tumba el POS entero.  El volumen se
+        controla por dominio (_load_pos_data_domain), no quitando el modelo.
+        """
         models_list = super()._load_pos_data_models(config_id)
-        # product.attribute.value ya viene en la lista nativa de O19;
-        # agregarlo de nuevo causaba carga duplicada en connectNewData.
-        if "darakjian.pos.facet" not in models_list:
-            models_list += ["darakjian.pos.facet"]
+        for model in ("darakjian.pos.facet", "product.attribute.value"):
+            if model not in models_list:
+                models_list += [model]
         return models_list
 
     # La carga on-demand de productos por categoría NO se resuelve con un método

@@ -22,8 +22,16 @@ export class DarakjianFacetBar extends Component {
     }
 
     get facets() {
-        const values = this.pos.models["product.attribute.value"].getAll();
-        return this.pos.models["darakjian.pos.facet"].getAll()
+        // Defensivo: si alguno de los modelos no está cargado en pos.models,
+        // devolver [] en vez de hacer getAll() sobre undefined — eso crashea
+        // el lifecycle de OWL y tumba el POS entero, aun sin facetas configuradas.
+        const facetModel = this.pos.models["darakjian.pos.facet"];
+        const valueModel = this.pos.models["product.attribute.value"];
+        if (!facetModel || !valueModel) {
+            return [];
+        }
+        const values = valueModel.getAll();
+        return facetModel.getAll()
             .slice()
             .sort((a, b) => (a.sequence - b.sequence) || (a.id - b.id))
             .map((f) => {
