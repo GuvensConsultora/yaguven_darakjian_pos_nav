@@ -176,6 +176,22 @@ $dk-accent: #2c3e50;
     }
 }
 
+// ---- Tamaño de tarjetas de producto (+20% ancho, +10% alto vs. default O19) ----
+// O19 POS usa .product-list (grid) y .product (card).
+// Default estimado: minmax(120px, 1fr) / altura ~130px (sin imagen) o ~160px (con imagen).
+// Con imágenes activas, height incluye el thumbnail arriba + nombre + precio abajo.
+.product-list {
+    // +20% ancho mínimo: 120px → 144px
+    grid-template-columns: repeat(auto-fill, minmax(144px, 1fr)) !important;
+}
+
+.product-list .product {
+    // +10% alto: ~160px → 176px (con imágenes)
+    min-height: 176px !important;
+    // Fallback flexbox si O19 no usa grid en esta versión:
+    width: 144px !important;
+}
+
 // ---- Ergonomía táctil (tablet): solo cuando el puntero es grueso ----
 @media (pointer: coarse) {
     .darakjian-pos-nav .darakjian-facet-chip,
